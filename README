@@ -1,1 +1,195 @@
+Important Intel Sandy Bridge Memory Controller Registers
+--------------------------------------------------------------
+Refernce Document : core-i7-lga-2011-datasheet-vol-2.pdf
 
+		DRAM RULE [0:9] REGISTER
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		12		  6		80h
+ 1		12		  6		88h
+ 1		12		  6		90h
+ 1		12		  6		98h
+ 1		12		  6	       100h
+ 1		12		  6	       108h
+ 1		12		  6	       110h
+ 1		12		  6	       118h
+ 1		12		  6	       120h
+ 1		12		  6	       128h
+
+ The DRAM Rule matches the upper 21 bits of system address 
+ with its Limit field. If it falls in the range, it is a hit.
+ Accordingly an interleaving index among the nodes is computed.
+ from DRAM INTERLEAVE LIST. 
+
+ OUTPUT :  Type of Memory : DRAM or Memory-Mapped CFG
+
+ TO DO : Plot the DRAM LIMITS to see if it is uniformly separated
+ across the ranges.
+
+	     DRAM INTERLEAVE[0:7] LIST REGISTER
+  
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		12		  6		84h
+ 1		12		  6		8ch
+ 1		12		  6		94h
+ 1		12		  6		9ch
+ 1		12		  6	       104h
+ 1		12		  6	       10ch
+ 1		12		  6	       114h
+ 1		12		  6	       11ch
+ 1		12		  6	       124h
+ 1		12		  6	       12ch
+
+ The interleave mode is used to identify the required offset
+ to find the node involved as per the interleave index. 
+
+ Output : Node ID [1:8]. I believe that the node id's are equivalent
+ to smp cores. For M620, it should be maximum 2.
+
+ TO DO : Plot the Node ID interleavings across various ranges
+ to see if how nodes participate in interleaving separated across the ranges.
+
+             
+ MISCELLANEOUS OBSERVATIONS :
+
+ There is a DRAM CONTROLLER VIEW OF THE MEMORY. 
+ Memory registers : TOHM, TOLM defines the ranges which are visible to the Operating System. 
+
+ 			TOLM
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		12		  7		80h
+
+ 3:0 :This register contains bits 31 to 28 of an address one byte above the maximum
+ DRAM memory below 4G that is usable by the operating system.
+
+ 			TOHM
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		12		  7		80h
+
+ 20:0 :This register contains bits 45:25 of an address one byte above the maximum
+DRAM memory; above 4 GB that is usable by the operating system.
+
+             iMC TARGET ADDRESS REGISTERS
+
+The DRAM rule range is sub-divided between the channels of a node.  
+Thus for N DRAM Rules and P channel, So total regions for complete
+interleaving become  N+P
+
+	    TADWAYNESS[0:11]
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  0		80h
+ 1		15		  0		88h
+ 1		15		  0		90h
+ 1		15		  0		98h
+ 1		15		  0		100h
+ 1		15		  0		108h
+ 1		15		  0		110h
+ 1		15		  0		118h
+ 1		15		  0		120h
+ 1		15		  0		128h
+ 1		15		  0		130h
+ 1		15		  0		138h
+
+The TAD Rule Range Limit : [45:26] : Granularity : 64 MB
+
+Output :
+        Number of Socket Ways 
+        Number of Channel Ways  
+
+To DO : Check is socket wayness and channel is uniformly
+interleaved across TAD Ranges.
+
+	TADCHNILVOFFSET[0:11]
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  2		90c-Bch	
+ 1		15		  3		90c-Bch	
+ 1		15		  4		90c-Bch	
+ 1		15		  5		90c-Bch	
+
+Use the TAD Rule hit to index into the CHNILVOFFSET to
+determine the channel id.
+
+        iMC RANK REGISTERS
+
+	 RIRWAYNESSLIMIT
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  2		108h, 10Ch, 110h, 114h, 118h 
+ 1		15		  3		108h, 10Ch, 110h, 114h, 118h 
+ 1		15		  4		108h, 10Ch, 110h, 114h, 118h 
+ 1		15		  5		108h, 10Ch, 110h, 114h, 118h 
+
+ Each of these registers mention RIR_LIMIT[38:29]
+                                 RIR_WAYNESS
+ if a rule hits, then the index is used to choose the offset from the 
+ RIR Range Rank interleave Offset Register.
+   
+ Determine the RIR Rule hit index
+ To DO : Check the Range interleaving across all the RIR_LIMIT ranges for uniformity.
+
+    RIR Range Rank Interleave OFFSET Register
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  2		120h
+						124h
+						128h
+						130h 
+ 1		15		  3		120h
+						124h
+						128h
+						130h 
+ 1		15		  4		120h
+						124h
+						128h
+						130h 
+ 1		15		  5		120h
+						124h
+						128h
+						130h 
+
+ OutPut : RIR_RNK_TGT : Target Rank ID for the interleave. Remember these are all logical ranks.
+          RIR_OFFSET 
+
+ To DO : Map Each logical Rank of a channel to a range of address within an interleave range
+
+   	iMC DIMM MEMORY TECHNOLOGY
+       --------------------------------
+
+	DIMM MEMORY TECHNOLOGY REGISTER
+       ---------------------------------
+	
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  2		80h
+						84h
+						88h
+ 1		15		  3		80h
+						84h
+						88h
+ 1		15		  4		80h
+						84h
+						88h
+ 1		15		  5		80h
+						84h
+						88h
+	
+ This shows that in Sandy Bridge Each channel can support a mximum of three DIMMs.
+
+ OutPut : Check if DIMM Populated.
+	  if So get the RANK_CNT.
+          map logical Rank to physical Rank.
+
+          Also obtain number of Row Address Pins
+          and number of Column Address Pins   
+
+	iMC Targer Address Registers
+     ------------------------------------
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  0		7ch
+
+Output : ECC Enable.
+         Lock_Enable else Independent Channel Mode
+	 Close_Page
+         closed-page address mapping.
