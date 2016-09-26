@@ -1,0 +1,370 @@
+Important Intel Sandy Bridge Memory Controller Registers
+--------------------------------------------------------------
+Refernce Document : core-i7-lga-2011-datasheet-vol-2.pdf
+
+		DRAM RULE [0:9] REGISTER
+
+#define SAD_DRAM_RULE_1_OFFSET   0x80
+#define SAD_DRAM_RULE_2_OFFSET   0x80
+#define SAD_DRAM_RULE_3_OFFSET   0x88
+#define SAD_DRAM_RULE_4_OFFSET   0x90
+#define SAD_DRAM_RULE_5_OFFSET   0x98
+#define SAD_DRAM_RULE_6_OFFSET   0x100
+#define SAD_DRAM_RULE_7_OFFSET   0x108
+#define SAD_DRAM_RULE_8_OFFSET   0x110
+#define SAD_DRAM_RULE_9_OFFSET   0x118
+#define SAD_DRAM_RULE_10_OFFSET  0x120
+
+unsigned long int SAD_DRAM_RULE_LIMIT[MAX_SAD_RULE]
+
+#define DRAM_ATTR(reg) 			FORM_BIT_FIELD(reg,,)
+#define SAD_INTERLEAVE_MODE(reg) 	FORM_BIT_FIELD(reg,,);
+#define SAD_INTERLEAVE_INDEX(reg)       FORM_BIT_FIELD(reg,,);
+
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		12		  6		80h
+ 1		12		  6		88h
+ 1		12		  6		90h
+ 1		12		  6		98h
+ 1		12		  6	       100h
+ 1		12		  6	       108h
+ 1		12		  6	       110h
+ 1		12		  6	       118h
+ 1		12		  6	       120h
+ 1		12		  6	       128h
+
+ The DRAM Rule matches the upper 21 bits of system address 
+ with its Limit field. If it falls in the range, it is a hit.
+ Accordingly an interleaving index among the nodes is computed.
+ from DRAM INTERLEAVE LIST. 
+
+ OUTPUT :  Type of Memory : DRAM or Memory-Mapped CFG
+
+ TO DO : Plot the DRAM LIMITS to see if it is uniformly separated
+ across the ranges.
+
+	     DRAM INTERLEAVE[0:7] LIST REGISTER
+  
+#define SAD_DRAM_INTERLEAVE_RULE_1_DECODE_OFFSET   0x84
+#define SAD_DRAM_INTERLEAVE_RULE_1_DECODE_OFFSET   0x8c
+#define SAD_DRAM_INTERLEAVE_RULE_1_DECODE_OFFSET   0x94
+#define SAD_DRAM_INTERLEAVE_RULE_1_DECODE_OFFSET   0x9c
+#define SAD_DRAM_INTERLEAVE_RULE_1_DECODE_OFFSET   0x104
+#define SAD_DRAM_INTERLEAVE_RULE_1_DECODE_OFFSET   0x10c
+#define SAD_DRAM_INTERLEAVE_RULE_1_DECODE_OFFSET   0x114
+#define SAD_DRAM_INTERLEAVE_RULE_1_DECODE_OFFSET   0x124
+#define SAD_DRAM_INTERLEAVE_RULE_1_DECODE_OFFSET   0x12c
+
+int NODE_ID;
+Use the interleave index as an offset to the corresponding decode offset.
+
+#define NODE_ID1(reg)  FORM_BIT_FIELD(reg, 0,2)
+#define NODE_ID2(reg)  FORM_BIT_FIELD(reg, 3,5)
+#define NODE_ID3(reg)  FORM_BIT_FIELD(reg, 8,10)
+#define NODE_ID4(reg)  FORM_BIT_FIELD(reg, 11,13)
+#define NODE_ID5(reg)  FORM_BIT_FIELD(reg, 16,18)
+#define NODE_ID6(reg)  FORM_BIT_FIELD(reg, 19,21)
+#define NODE_ID7(reg)  FORM_BIT_FIELD(reg, 24,26)
+#define NODE_ID8(reg)  FORM_BIT_FIELD(reg, 27,29)
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		12		  6		84h
+ 1		12		  6		8ch
+ 1		12		  6		94h
+ 1		12		  6		9ch
+ 1		12		  6	       104h
+ 1		12		  6	       10ch
+ 1		12		  6	       114h
+ 1		12		  6	       11ch
+ 1		12		  6	       124h
+ 1		12		  6	       12ch
+
+ The interleave mode is used to identify the required offset
+ to find the node involved as per the interleave index. 
+
+ Output : Node ID [1:8]. I believe that the node id's are equivalent
+ to smp cores. For M620, it should be maximum 2.
+
+ TO DO : Plot the Node ID interleavings across various ranges
+ to see if how nodes participate in interleaving separated across the ranges.
+
+             
+ MISCELLANEOUS OBSERVATIONS :
+
+ There is a DRAM CONTROLLER VIEW OF THE MEMORY. 
+ Memory registers : TOHM, TOLM defines the ranges which are visible to the Operating System. 
+
+ 			TOLM
+
+#define TOLM(reg)	FORM_BIT_FIELD(reg,26,31)
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		12		  7		80h
+
+ 3:0 :This register contains bits 31 to 28 of an address one byte above the maximum
+ DRAM memory below 4G that is usable by the operating system.
+
+ 			TOHM
+
+#define TOHM(reg)	FORM_BIT_FIELD(reg,26,63)
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		12		  7		80h
+
+20:0 :This register contains bits 45:25 of an address one byte above the maximum
+DRAM memory; above 4 GB that is usable by the operating system.
+
+             iMC TARGET ADDRESS REGISTERS
+
+The DRAM rule range is sub-divided between the channels of a node.  
+Thus for N DRAM Rules and P channel, So total regions for complete
+interleaving become  N+P
+
+	    TADWAYNESS[0:11]
+
+#define TAD_RULE1_OFFSET 	0x80
+#define TAD_RULE2_OFFSET 	0x88
+#define TAD_RULE3_OFFSET 	0x90
+#define TAD_RULE4_OFFSET 	0x98
+#define TAD_RULE5_OFFSET 	0x100
+#define TAD_RULE6_OFFSET 	0x108
+#define TAD_RULE7_OFFSET 	0x110
+#define TAD_RULE8_OFFSET 	0x118
+#define TAD_RULE9_OFFSET 	0x120
+#define TAD_RULE10_OFFSET 	0x128
+#define TAD_RULE11_OFFSET 	0x130
+#define TAD_RULE12_OFFSET 	0x138
+
+#define TAD_RANGE_LIMIT(reg)	FORM_BIT_FIELD(reg,,)
+#define SOCKET_WAYS(reg) 	FORM_BIT_FIELD(reg,,) 
+#define CHANNEL_WAYS(reg)       FORM_BIT_FIELD(reg,,)
+
+unsigned long int TAD_DRAM_RULE_LIMIT[MAX_TAD_RULE]
+
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  0		80h
+ 1		15		  0		88h
+ 1		15		  0		90h
+ 1		15		  0		98h
+ 1		15		  0		100h
+ 1		15		  0		108h
+ 1		15		  0		110h
+ 1		15		  0		118h
+ 1		15		  0		120h
+ 1		15		  0		128h
+ 1		15		  0		130h
+ 1		15		  0		138h
+
+The TAD Rule Range Limit : [45:26] : Granularity : 64 MB
+
+Output :
+        Number of Socket Ways 
+        Number of Channel Ways  
+
+To DO : Check is socket wayness and channel is uniformly
+interleaved across TAD Ranges.
+
+	TADCHNILVOFFSET[0:11]
+
+#define CHANNEL_ID(reg)    	FORM_BIT_FIELD(reg, , )
+
+#define CHANNEL_TAD_OFFSET(reg) FORM_BIT_FIELD(reg, , )
+
+For a given channel interleave  these are the possible interleavings whose
+offsets can be verified in these offset registers
+ 
+#define TAD_RULE1_DECODE_OFFSET 	0x90
+#define TAD_RULE2_DECODE_OFFSET 	0x98
+#define TAD_RULE3_DECODE_OFFSET 	0x100
+#define TAD_RULE4_DECODE_OFFSET 	0x108
+#define TAD_RULE5_DECODE_OFFSET 	0x110
+#define TAD_RULE6_DECODE_OFFSET 	0x118
+#define TAD_RULE7_DECODE_OFFSET 	0x120
+#define TAD_RULE8_DECODE_OFFSET 	0x128
+#define TAD_RULE9_DECODE_OFFSET 	0x130
+#define TAD_RULE10_DECODE_OFFSET 	0x138
+
+#define CH1_FUNC 2
+#define CH2_FUNC 3
+#define CH3_FUNC 4
+#define CH4_FUNC 5
+
+#define CH_ID_OFFSET(reg)    FORM_BIT_FIELD(reg,,)
+#define TAD_RULE_OFFSET(reg)      FORM_BIT_FIELD(reg,,)
+
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  2		90c-Bch	
+ 1		15		  3		90c-Bch	
+ 1		15		  4		90c-Bch	
+ 1		15		  5		90c-Bch	
+
+Use the TAD Rule hit to index into the CHNILVOFFSET to
+determine the channel id.
+
+        iMC RANK REGISTERS
+
+	 RIRWAYNESSLIMIT
+
+#define MAX_RIR_RANGES 5
+#define MAX_CH_WAYS    4
+
+#define RIR_RULE1_OFFSET 0x108
+#define RIR_RULE2_OFFSET 0x10c
+#define RIR_RULE3_OFFSET 0x110
+#define RIR_RULE4_OFFSET 0x114
+#define RIR_RULE5_OFFSET 0x118
+
+#define RIR_VALID(reg)    FORM_BIT_FIELD(reg,31,31)
+#define RIR_CH_LIMIT(reg) FORM_BIT_FIELD(reg,1,10) // 29:38
+#define RIR_WAYS(reg)     FORM_BIT_FIELD(reg,28,29)
+
+int RIR_RULE_LIMIT[MAC_CH_WAYS][MAX_RIR_WAYS]
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  2		108h, 10Ch, 110h, 114h, 118h 
+ 1		15		  3		108h, 10Ch, 110h, 114h, 118h 
+ 1		15		  4		108h, 10Ch, 110h, 114h, 118h 
+ 1		15		  5		108h, 10Ch, 110h, 114h, 118h 
+
+ if a rule hits, then the index is used to choose the offset from the 
+ RIR Range Rank interleave Offset Register.
+   
+ Determine the RIR Rule hit index
+ To DO : Check the Range interleaving across all the RIR_LIMIT ranges for uniformity.
+
+    RIR Range Rank Interleave OFFSET Register
+
+#define RANK_RANGE1_INTERLEAVE_INDEX1_DECODE_OFFSET 	0x120
+#define RANK_RANGE1_INTERLEAVE_INDEX2_DECODE_OFFSET 	0x124
+#define RANK_RANGE1_INTERLEAVE_INDEX3_DECODE_OFFSET 	0x128
+#define RANK_RANGE1_INTERLEAVE_INDEX4_DECODE_OFFSET 	0x12c
+#define RANK_RANGE1_INTERLEAVE_INDEX5_DECODE_OFFSET 	0x130
+#define RANK_RANGE1_INTERLEAVE_INDEX6_DECODE_OFFSET 	0x134
+#define RANK_RANGE1_INTERLEAVE_INDEX7_DECODE_OFFSET 	0x138
+#define RANK_RANGE1_INTERLEAVE_INDEX8_DECODE_OFFSET 	0x13c
+
+#define RANK_RANGE2_INTERLEAVE_INDEX1_DECODE_OFFSET 	0x140
+#define RANK_RANGE2_INTERLEAVE_INDEX2_DECODE_OFFSET 	0x144
+#define RANK_RANGE2_INTERLEAVE_INDEX3_DECODE_OFFSET 	0x148
+#define RANK_RANGE2_INTERLEAVE_INDEX4_DECODE_OFFSET 	0x14c
+#define RANK_RANGE2_INTERLEAVE_INDEX5_DECODE_OFFSET 	0x150
+#define RANK_RANGE2_INTERLEAVE_INDEX6_DECODE_OFFSET 	0x154
+#define RANK_RANGE2_INTERLEAVE_INDEX7_DECODE_OFFSET 	0x158
+#define RANK_RANGE2_INTERLEAVE_INDEX8_DECODE_OFFSET 	0x15c
+
+#define RANK_RANGE3_INTERLEAVE_INDEX1_DECODE_OFFSET 	0x160
+#define RANK_RANGE3_INTERLEAVE_INDEX2_DECODE_OFFSET 	0x164
+#define RANK_RANGE3_INTERLEAVE_INDEX3_DECODE_OFFSET 	0x168
+#define RANK_RANGE3_INTERLEAVE_INDEX4_DECODE_OFFSET 	0x16c
+#define RANK_RANGE3_INTERLEAVE_INDEX5_DECODE_OFFSET 	0x170
+#define RANK_RANGE3_INTERLEAVE_INDEX6_DECODE_OFFSET 	0x174
+#define RANK_RANGE3_INTERLEAVE_INDEX7_DECODE_OFFSET 	0x178
+#define RANK_RANGE3_INTERLEAVE_INDEX8_DECODE_OFFSET 	0x17c
+
+#define RANK_RANGE4_INTERLEAVE_INDEX1_DECODE_OFFSET 	0x180
+#define RANK_RANGE4_INTERLEAVE_INDEX2_DECODE_OFFSET 	0x184
+#define RANK_RANGE4_INTERLEAVE_INDEX3_DECODE_OFFSET 	0x188
+#define RANK_RANGE4_INTERLEAVE_INDEX4_DECODE_OFFSET 	0x18c
+#define RANK_RANGE4_INTERLEAVE_INDEX5_DECODE_OFFSET 	0x190
+#define RANK_RANGE4_INTERLEAVE_INDEX6_DECODE_OFFSET 	0x194
+#define RANK_RANGE4_INTERLEAVE_INDEX7_DECODE_OFFSET 	0x198
+#define RANK_RANGE4_INTERLEAVE_INDEX8_DECODE_OFFSET 	0x19c
+
+#define RANK_RANGE5_INTERLEAVE_INDEX1_DECODE_OFFSET 	0x1A0
+#define RANK_RANGE5_INTERLEAVE_INDEX2_DECODE_OFFSET 	0x1A4
+#define RANK_RANGE5_INTERLEAVE_INDEX3_DECODE_OFFSET 	0x1A8
+#define RANK_RANGE5_INTERLEAVE_INDEX4_DECODE_OFFSET 	0x1Ac
+#define RANK_RANGE5_INTERLEAVE_INDEX5_DECODE_OFFSET 	0x1B0
+#define RANK_RANGE5_INTERLEAVE_INDEX6_DECODE_OFFSET 	0x1B4
+#define RANK_RANGE5_INTERLEAVE_INDEX7_DECODE_OFFSET 	0x1B8
+#define RANK_RANGE5_INTERLEAVE_INDEX8_DECODE_OFFSET 	0x1Bc
+
+#define RIR_RNK_TGT(reg)   FORM_BIT_FIELD(reg,16,19)
+#define RIR_OFFSET(reg)    FORM_BIT_FIELD(reg,2,14)
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  2		120h
+						124h
+						128h
+						130h 
+ 1		15		  3		120h
+						124h
+						128h
+						130h 
+ 1		15		  4		120h
+						124h
+						128h
+						130h 
+ 1		15		  5		120h
+						124h
+						128h
+						130h 
+
+ OutPut : RIR_RNK_TGT : Target Rank ID for the interleave. Remember these are all logical ranks.
+          RIR_OFFSET 
+
+ To DO : Map Each logical Rank of a channel to a range of address within an interleave range
+
+   	iMC DIMM MEMORY TECHNOLOGY
+       --------------------------------
+
+	DIMM MEMORY TECHNOLOGY REGISTER
+       ---------------------------------
+
+#define MAX_DIMMS 3
+
+#define DIMM1_OFFSET 0x80
+#define DIMM2_OFFSET 0x84
+#define DIMM3_OFFSET 0x88
+
+#define DIMM_STATUS(reg)        FORM_BIR_FIELD(reg,14,14)
+#define RANK_CNT(reg)  		FORM_BIT_FIELD(reg,12,13)
+#define RANK_STATUS(reg)        FORM_BIT_FIELD(reg,16,19)
+#define RANK_ROW_WIDTH(reg)     FORM_BIT_FIELD(reg,2,4)
+#define RANK_COLUMN_WIDTH(reg)  FORM_BIT_FIELD(reg,0,1)
+	
+int DIMM[MAX_DIMMS]
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  2		80h
+						84h
+						88h
+ 1		15		  3		80h
+						84h
+						88h
+ 1		15		  4		80h
+						84h
+						88h
+ 1		15		  5		80h
+						84h
+						88h
+	
+ This shows that in Sandy Bridge Each channel can support a mximum of three DIMMs.
+
+ OutPut : Check if DIMM Populated.
+	  if So get the RANK_CNT.
+          map logical Rank to physical Rank.
+
+          Also obtain number of Row Address Pins
+          and number of Column Address Pins   
+
+	iMC Targer Address Registers
+     ------------------------------------
+
+#define MC_MODE_OFFSET  0x7c
+#define MC_ECC_STATUS(reg) FORM_BIT_FIELD(reg,,)
+#define MC_LOCK_STATUS(reg) FORM_BIT_FIELD(reg,,)
+#define MC_IS_CLOSE_PAGE(reg) FORM_BIT_FIELD(reg,,)
+#define MC_IS_OPEN_PAGE(reg)  FORM_BIT_FIELD(reg,,)
+
+ PCI_BUS NO     PCI_DEVICE_ID     PCI_FUNC    OFFSET
+ 1		15		  0		7ch
+
+Output : ECC Enable.
+         Lock_Enable else Independent Channel Mode
+	 Close_Page
+         closed-page address mapping.
+

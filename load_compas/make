@@ -1,0 +1,5 @@
+obj-m := kload.o 
+all:
+	make -C /lib/modules/`uname -r`/build M=`pwd` -e CFLAGS=-O0 modules 
+clean:
+	make -C /lib/modules/`uname -r`/build M=`pwd` clean

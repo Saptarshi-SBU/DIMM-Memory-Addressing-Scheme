@@ -1,0 +1,6 @@
+This kernel thread shall continuously allocate
+physcial memory on a given node.
+
+Prior Running the allocator, the imc.ko driver has to be
+registered.
+

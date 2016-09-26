@@ -1,0 +1,48 @@
+Notes From LDD3
+----------------------
+struct pci_dev;
+
+int pci_read_config_byte(struct pci_dev *dev, int where, u8 *val);
+int pci_read_config_word(struct pci_dev *dev, int where, u16 *val);
+int pci_read_config_dword(struct pci_dev *dev, int where, u32 *val);
+
+Read one, two, or four bytes from the configuration space of the device identi-
+fied by dev. The where argument is the byte offset from the beginning of the con-
+figuration space. The value fetched from the configuration space is returned
+through the val pointer, and the return value of the functions is an error code.
+
+The word and dword functions convert the value just read from little-endian to
+the native byte order of the processor, so you need not deal with byte ordering.
+int pci_write_config_byte(struct pci_dev *dev, int where, u8 val);
+int pci_write_config_word(struct pci_dev *dev, int where, u16 val);
+int pci_write_config_dword(struct pci_dev *dev, int where, u32 val);
+
+Write one, two, or four bytes to the configuration space. The device is identified
+by dev as usual, and the value being written is passed as val. The word and
+dword functions convert the value to little-endian before writing to the periph-
+eral device.
+
+All of the previous functions are implemented as inline functions that really call the
+following functions. Feel free to use these functions instead of the above in case the
+driver does not have access to a struct pci_dev at any paticular moment in time:
+
+int pci_bus_read_config_byte (struct pci_bus *bus, unsigned int devfn, int
+where, u8 *val);
+int pci_bus_read_config_word (struct pci_bus *bus, unsigned int devfn, int
+where, u16 *val);
+int pci_bus_read_config_dword (struct pci_bus *bus, unsigned int devfn, int
+where, u32 *val);
+Just like the pci_read_ functions, but struct pci_bus * and devfn variables are
+needed instead of a struct pci_dev *.
+
+Structure that represents a PCI device within the kernel.
+struct pci_driver;
+Structure that represents a PCI driver. All PCI drivers must define this.
+struct pci_device_id
+
+----------------------------------------------------------------------------------------
+If the ability to find a specific PCI device is really needed, the following functions are
+available:
+struct pci_dev *pci_get_device(unsigned int vendor, unsigned int device,struct pci_dev *from);
+
+
